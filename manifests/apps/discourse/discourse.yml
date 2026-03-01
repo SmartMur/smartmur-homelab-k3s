@@ -1,0 +1,329 @@
+---
+# Discourse — PostgreSQL + Redis + Mailhog (SMTP stub) + web
+# PVCs use truenas-nfs for shared storage
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: discourse-postgres-data
+  namespace: discourse
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: truenas-nfs
+  resources:
+    requests:
+      storage: 20Gi
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: discourse-uploads
+  namespace: discourse
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: truenas-nfs
+  resources:
+    requests:
+      storage: 10Gi
+
+# Secret `discourse-secret` is required and must be provided via
+# local-only `manifests/secrets/*.yml` or `kubectl create secret`.
+# Required keys: POSTGRESQL_PASSWORD, DISCOURSE_PASSWORD, DISCOURSE_EMAIL.
+
+---
+# ── Mailhog — local SMTP stub (catches all outbound email) ────────────────────
+# Access web UI at https://mail.kwe2.org to read captured emails
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mailhog
+  namespace: discourse
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mailhog
+  template:
+    metadata:
+      labels:
+        app: mailhog
+    spec:
+      containers:
+        - name: mailhog
+          image: mailhog/mailhog:latest
+          ports:
+            - containerPort: 1025   # SMTP
+            - containerPort: 8025   # Web UI
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mailhog
+  namespace: discourse
+spec:
+  selector:
+    app: mailhog
+  ports:
+    - name: smtp
+      port: 1025
+    - name: web
+      port: 8025
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: mailhog
+  namespace: discourse
+spec:
+  entryPoints: [websecure]
+  routes:
+    - match: Host(`mail.kwe2.org`)
+      kind: Rule
+      services:
+        - name: mailhog
+          port: 8025
+  tls: {}
+
+---
+# ── PostgreSQL ────────────────────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: discourse-postgres
+  namespace: discourse
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: discourse-postgres
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: discourse-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: pgvector/pgvector:pg14
+          env:
+            - name: POSTGRES_USER
+              value: discourse
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: discourse-secret
+                  key: POSTGRESQL_PASSWORD
+            - name: POSTGRES_DB
+              value: discourse
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: discourse-postgres-data
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: discourse-postgres
+  namespace: discourse
+spec:
+  selector:
+    app: discourse-postgres
+  ports:
+    - port: 5432
+
+---
+# ── Redis ─────────────────────────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: discourse-redis
+  namespace: discourse
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: discourse-redis
+  template:
+    metadata:
+      labels:
+        app: discourse-redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7.0-alpine
+          args: ["--save", "", "--appendonly", "no"]
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: discourse-redis
+  namespace: discourse
+spec:
+  selector:
+    app: discourse-redis
+  ports:
+    - port: 6379
+
+---
+# ── Discourse data PVC (caches Bitnami app + built assets across restarts) ────
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: discourse-data
+  namespace: discourse
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 30Gi
+
+---
+# ── Discourse web ─────────────────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: discourse
+  namespace: discourse
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: discourse
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: discourse
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values: [k3s-worker-01]
+      containers:
+        - name: discourse
+          image: bitnamilegacy/discourse:3.5.0-debian-12-r0
+          ports:
+            - containerPort: 3000
+          env:
+            - name: DISCOURSE_HOST
+              value: forum.kwe2.org
+            - name: DISCOURSE_DATABASE_HOST
+              value: discourse-postgres
+            - name: DISCOURSE_DATABASE_USER
+              value: discourse
+            - name: DISCOURSE_DATABASE_NAME
+              value: discourse
+            - name: DISCOURSE_DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: discourse-secret
+                  key: POSTGRESQL_PASSWORD
+            - name: DISCOURSE_REDIS_HOST
+              value: discourse-redis
+            - name: DISCOURSE_SMTP_HOST
+              value: mailhog
+            - name: DISCOURSE_SMTP_PORT
+              value: "1025"
+            - name: DISCOURSE_SMTP_USER
+              value: ""
+            - name: DISCOURSE_SMTP_PASSWORD
+              value: ""
+            - name: DISCOURSE_SMTP_PROTOCOL
+              value: ""
+            - name: DISCOURSE_USERNAME
+              value: admin
+            - name: DISCOURSE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: discourse-secret
+                  key: DISCOURSE_PASSWORD
+            - name: DISCOURSE_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: discourse-secret
+                  key: DISCOURSE_EMAIL
+            - name: DISCOURSE_SITE_NAME
+              value: "LABing Forum"
+            - name: DISCOURSE_SKIP_INSTALL
+              value: "yes"
+            - name: ALLOW_EMPTY_PASSWORD
+              value: "yes"
+            - name: NODE_OPTIONS
+              value: "--max-old-space-size=1500"
+          volumeMounts:
+            - name: discourse-data
+              mountPath: /bitnami/discourse
+          resources:
+            requests:
+              cpu: 500m
+              memory: 2Gi
+            limits:
+              cpu: 2000m
+              memory: 4Gi
+      volumes:
+        - name: discourse-data
+          persistentVolumeClaim:
+            claimName: discourse-data
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: discourse
+  namespace: discourse
+spec:
+  selector:
+    app: discourse
+  ports:
+    - port: 3000
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: discourse
+  namespace: discourse
+spec:
+  entryPoints: [websecure]
+  routes:
+    - match: Host(`forum.kwe2.org`)
+      kind: Rule
+      services:
+        - name: discourse
+          port: 3000
+  tls: {}

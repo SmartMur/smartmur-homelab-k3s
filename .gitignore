@@ -1,0 +1,63 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+
+# Editor and swap files
+*.swp
+*.swo
+*~
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+*.bak
+*.orig
+
+# Terraform local state
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/tfplan
+terraform/.terraform.tfstate.lock.info
+
+# Terraform local variables/secrets
+terraform/terraform.tfvars
+terraform/terraform.tfvars.json
+*.auto.tfvars
+*.auto.tfvars.json
+
+# Cluster and kube auth material
+.k3s-node-token
+kubeconfig-raw.yml
+kubeconfig*.yml
+*.kubeconfig
+
+# Kubernetes manifests secrets overlays
+manifests/secrets/*.yml
+!manifests/secrets/.gitkeep
+
+# Env files and secret material
+*.env
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.kdbx
+secrets.*
+*.secret
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Ansible local vaults/inventory
+ansible/*.vault
+ansible/*vault*.yml
+ansible/inventory.local.yml

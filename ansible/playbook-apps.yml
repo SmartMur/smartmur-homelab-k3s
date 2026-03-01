@@ -1,0 +1,57 @@
+---
+# ──────────────────────────────────────────────────────────────────────────────
+# Playbook: Deploy all apps from manifests/ onto the k3s cluster
+# Run: ansible-playbook -i inventory.yml playbook-apps.yml
+# ──────────────────────────────────────────────────────────────────────────────
+
+- name: Deploy all apps to k3s
+  hosts: localhost
+  connection: local
+  vars:
+    manifests_dir: "{{ playbook_dir }}/../manifests"
+
+  tasks:
+    - name: Apply namespaces
+      command: kubectl apply -f {{ manifests_dir }}/namespaces.yml
+      changed_when: false
+
+    - name: Apply secrets (if present)
+      command: kubectl apply -f {{ manifests_dir }}/secrets/
+      ignore_errors: true
+      changed_when: false
+
+    - name: Deploy apps
+      command: kubectl apply -f {{ manifests_dir }}/apps/{{ item }}/
+      loop:
+        - homepage
+        - chirpy
+        - vaultwarden
+        - authentik
+        - n8n
+        - code-server
+        - obsidian
+        - discourse
+        - dockhand
+        - pangolin
+      changed_when: false
+
+    - name: Wait for all deployments to be ready
+      command: kubectl rollout status deployment/{{ item.name }} -n {{ item.ns }} --timeout=300s
+      loop:
+        - { name: homepage,    ns: apps }
+        - { name: chirpy,      ns: apps }
+        - { name: vaultwarden, ns: vaultwarden }
+        - { name: n8n,         ns: n8n }
+        - { name: code-server, ns: apps }
+        - { name: obsidian,    ns: apps }
+      ignore_errors: true
+      changed_when: false
+
+    - name: Show all pods
+      command: kubectl get pods -A
+      register: pods_output
+      changed_when: false
+
+    - name: Display pods
+      debug:
+        msg: "{{ pods_output.stdout_lines }}"

@@ -1,0 +1,60 @@
+---
+################################################################################
+# k3s
+################################################################################
+k3s_version: "v1.31.4+k3s1"
+k3s_token: "{{ lookup('env', 'K3S_TOKEN') | default('CHANGE_ME_USE_ENV_VAR') }}"
+k3s_master_ip: "192.168.100.110"
+
+# k3s install flags for master
+k3s_server_extra_args: >-
+  --disable=servicelb
+  --disable=traefik
+  --write-kubeconfig-mode=644
+  --node-taint CriticalAddonsOnly=true:NoExecute
+
+# k3s install flags for workers
+k3s_agent_extra_args: ""
+
+# Flannel backend
+k3s_flannel_backend: "vxlan"
+
+################################################################################
+# TrueNAS NFS
+################################################################################
+truenas_ip: "192.168.13.69"
+truenas_nfs_base_path: "/mnt/tank/k3s"
+
+# NFS shares to create (path, allowed CIDR)
+nfs_shares:
+  - path: "{{ truenas_nfs_base_path }}/vaultwarden"
+  - path: "{{ truenas_nfs_base_path }}/authentik"
+  - path: "{{ truenas_nfs_base_path }}/n8n"
+  - path: "{{ truenas_nfs_base_path }}/code-server"
+  - path: "{{ truenas_nfs_base_path }}/obsidian"
+  - path: "{{ truenas_nfs_base_path }}/discourse"
+  - path: "{{ truenas_nfs_base_path }}/homepage"
+  - path: "{{ truenas_nfs_base_path }}/chirpy"
+  - path: "{{ truenas_nfs_base_path }}/dockhand"
+
+nfs_allowed_cidr: "192.168.100.0/24"
+
+################################################################################
+# Traefik (deployed via Helm)
+################################################################################
+traefik_namespace: "traefik"
+traefik_version: "32.1.0"
+cluster_domain: "lab.local"        # Update to your LAN domain
+traefik_lb_ip: "192.168.100.120"   # Static IP for Traefik LoadBalancer (MetalLB)
+
+################################################################################
+# MetalLB
+################################################################################
+metallb_namespace: "metallb-system"
+metallb_ip_range: "192.168.100.120-192.168.100.130"
+
+################################################################################
+# NFS Provisioner (Helm)
+################################################################################
+nfs_provisioner_version: "4.0.18"
+nfs_storageclass_name: "truenas-nfs"

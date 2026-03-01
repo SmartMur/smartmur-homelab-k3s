@@ -1,0 +1,31 @@
+---
+all:
+  vars:
+    # Change to "ubuntu" if using template 9000 (Ubuntu 22.04)
+    ansible_user: debian
+    ansible_ssh_private_key_file: ~/.ssh/id_ed25519
+    ansible_ssh_common_args: "-o StrictHostKeyChecking=no"
+
+k3s_cluster:
+  children:
+    k3s_master:
+      hosts:
+        k3s-master-01:
+          ansible_host: 192.168.100.110
+          # .110 was previously logg.kwe2.org — router blocks direct SSH; route via PVE2 (PVE1 also works when available)
+          ansible_ssh_common_args: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ProxyJump=root@192.168.100.200"
+    k3s_workers:
+      hosts:
+        k3s-worker-01:
+          ansible_host: 192.168.100.111
+        k3s-worker-02:
+          ansible_host: 192.168.100.112
+        k3s-worker-03:
+          ansible_host: 192.168.100.113
+
+truenas:
+  hosts:
+    truenas-01:
+      ansible_host: 192.168.13.69
+      ansible_user: root
+      ansible_ssh_private_key_file: ~/.ssh/id_ed25519

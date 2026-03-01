@@ -1,0 +1,340 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homepage-config
+  namespace: apps
+data:
+  settings.yaml: |
+    title: MurzDev Command Center
+    description: Platform, apps, and operations in one view
+    theme: dark
+    color: stone
+    headerStyle: boxed
+    target: _blank
+    statusStyle: dot
+    useEqualHeights: true
+    quicklaunch:
+      searchDescriptions: true
+      hideInternetSearch: false
+      hideVisitURL: false
+      showSearchSuggestions: true
+    layout:
+      Infrastructure:
+        style: row
+        columns: 4
+      Apps:
+        style: row
+        columns: 4
+      Content:
+        style: row
+        columns: 3
+      Admin:
+        style: row
+        columns: 3
+
+  services.yaml: |
+    - Infrastructure:
+        - Traefik:
+            href: https://traefik.kwe2.org
+            description: Ingress Controller
+            icon: traefik.png
+        - Vaultwarden:
+            href: https://vault.kwe2.org
+            description: Password Manager
+            icon: bitwarden.png
+            siteMonitor: http://vaultwarden.vaultwarden/alive
+        - Authentik:
+            href: https://auth.kwe2.org
+            description: SSO / Identity Provider
+            icon: authentik.png
+            siteMonitor: http://authentik.authentik:9000/-/health/live/
+        - Pangolin:
+            href: https://pangolin.kwe2.org
+            description: Tunnel / Mesh Network
+            icon: wireguard.png
+            siteMonitor: http://pangolin:3002
+        - Headlamp:
+            href: https://k8s.kwe2.org
+            description: Kubernetes Cluster Manager
+            icon: kubernetes.png
+            siteMonitor: http://headlamp
+    - Apps:
+        - n8n:
+            href: https://n8n.kwe2.org
+            description: Workflow Automation
+            icon: n8n.png
+            siteMonitor: http://n8n.n8n:5678/healthz
+        - Code Server:
+            href: https://code.kwe2.org
+            description: Browser IDE
+            icon: code-server.png
+            siteMonitor: http://code-server:8080/healthz
+        - Obsidian:
+            href: https://obsidian.kwe2.org
+            description: Knowledge Base
+            icon: obsidian.png
+            siteMonitor: http://obsidian:3000
+        - Dockhand:
+            href: https://dockhand2.kwe2.org
+            description: Docker/Hawser Fleet Control
+            icon: kubernetes.png
+            siteMonitor: http://dockhand:3000/api/health
+        - Notify:
+            href: https://notify.kwe2.org
+            description: Infrastructure Monitoring + Alerts
+            icon: mdi-bell-alert
+            siteMonitor: http://notify:9090/readyz
+    - Content:
+        - Blog:
+            href: https://blog.kwe2.org
+            description: Chirpy Jekyll Blog
+            icon: jekyll.png
+            siteMonitor: http://chirpy
+        - Discourse:
+            href: https://forum.kwe2.org
+            description: Community Forum
+            icon: discourse.png
+            siteMonitor: http://discourse.discourse:3000
+        - Mailhog:
+            href: https://mail.kwe2.org
+            description: Email Testing
+            icon: email.png
+            siteMonitor: http://mailhog.discourse:8025
+    - Admin:
+        - Proxmox PVE1:
+            href: https://192.168.100.100:8006
+            description: Hypervisor
+            icon: proxmox.png
+        - TrueNAS:
+            href: https://192.168.13.69
+            description: Storage and Relay
+            icon: truenas.png
+        - NPM:
+            href: https://npm.kwe2.org
+            description: Edge Proxy Manager
+            icon: nginx.png
+
+  widgets.yaml: |
+    - search:
+        provider: duckduckgo
+        target: _blank
+    - datetime:
+        text_size: xl
+        format:
+          dateStyle: medium
+          timeStyle: short
+          hour12: false
+    - resources:
+        cpu: true
+        memory: true
+        disk: /
+    - kubernetes:
+        cluster:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+          label: k3s
+        nodes:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+
+  bookmarks.yaml: |
+    - Infrastructure:
+        - Proxmox PVE1:
+            - href: https://192.168.100.100:8006
+        - Proxmox PVE2:
+            - href: https://192.168.100.200:8006
+        - TrueNAS:
+            - href: https://192.168.13.69
+        - NPM:
+            - href: https://npm.kwe2.org
+    - Ops:
+        - Traefik Dashboard:
+            - href: https://traefik.kwe2.org/dashboard/
+        - Headlamp:
+            - href: https://k8s.kwe2.org
+        - Authentik Admin:
+            - href: https://auth.kwe2.org
+        - k3s Repo:
+            - href: https://github.com/Light-Heart-Labs/MurzDev_env
+
+  kubernetes.yaml: |
+    mode: cluster
+
+  docker.yaml: |
+    {}
+
+  custom.css: |
+    :root {
+      --md-accent: #22d3ee;
+      --md-accent-2: #3b82f6;
+      --md-card-bg: rgba(15, 23, 42, 0.72);
+      --md-card-border: rgba(34, 211, 238, 0.25);
+    }
+
+    body {
+      background:
+        radial-gradient(circle at 12% 16%, rgba(34, 211, 238, 0.2), transparent 42%),
+        radial-gradient(circle at 86% 8%, rgba(59, 130, 246, 0.2), transparent 40%),
+        linear-gradient(180deg, #020617, #0f172a 48%, #111827);
+      min-height: 100vh;
+    }
+
+    .service, .bookmark, .widget, .information-widget {
+      background: var(--md-card-bg) !important;
+      border: 1px solid var(--md-card-border) !important;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 12px 24px rgba(2, 6, 23, 0.35);
+    }
+
+    .group-header, .information-widget .title {
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #bae6fd !important;
+    }
+
+    a:hover .service-title {
+      color: var(--md-accent) !important;
+      transition: color 140ms ease-in;
+    }
+
+  custom.js: |
+    // Keep the board fresh without manual reloads.
+    setInterval(() => window.location.reload(), 5 * 60 * 1000);
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: homepage
+  namespace: apps
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: homepage-readonly
+rules:
+  - apiGroups: [""]
+    resources: ["nodes", "namespaces", "pods", "services"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "statefulsets", "daemonsets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses"]
+    verbs: ["get", "list", "watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: homepage-readonly
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: homepage-readonly
+subjects:
+  - kind: ServiceAccount
+    name: homepage
+    namespace: apps
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: homepage
+  namespace: apps
+  labels:
+    app: homepage
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: homepage
+  template:
+    metadata:
+      labels:
+        app: homepage
+    spec:
+      serviceAccountName: homepage
+      containers:
+        - name: homepage
+          image: ghcr.io/gethomepage/homepage:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: HOMEPAGE_ALLOWED_HOSTS
+              value: "home.kwe2.org"
+          volumeMounts:
+            - name: config-rw
+              mountPath: /app/config
+            - name: config
+              mountPath: /app/config/settings.yaml
+              subPath: settings.yaml
+            - name: config
+              mountPath: /app/config/services.yaml
+              subPath: services.yaml
+            - name: config
+              mountPath: /app/config/widgets.yaml
+              subPath: widgets.yaml
+            - name: config
+              mountPath: /app/config/bookmarks.yaml
+              subPath: bookmarks.yaml
+            - name: config
+              mountPath: /app/config/kubernetes.yaml
+              subPath: kubernetes.yaml
+            - name: config
+              mountPath: /app/config/docker.yaml
+              subPath: docker.yaml
+            - name: config
+              mountPath: /app/config/custom.css
+              subPath: custom.css
+            - name: config
+              mountPath: /app/config/custom.js
+              subPath: custom.js
+          resources:
+            requests:
+              cpu: 25m
+              memory: 96Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+      volumes:
+        - name: config-rw
+          emptyDir: {}
+        - name: config
+          configMap:
+            name: homepage-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: homepage
+  namespace: apps
+spec:
+  selector:
+    app: homepage
+  ports:
+    - port: 3000
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: homepage
+  namespace: apps
+spec:
+  entryPoints: [websecure]
+  routes:
+    - match: Host(`home.kwe2.org`)
+      kind: Rule
+      services:
+        - name: homepage
+          port: 3000
+  tls: {}

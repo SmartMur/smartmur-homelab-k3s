@@ -1,0 +1,184 @@
+---
+# ──────────────────────────────────────────────────────────────────────────────
+# Playbook: Configure TrueNAS NFS shares + install NFS StorageClass on k3s
+# Run: ansible-playbook -i inventory.yml playbook-nfs.yml
+# ──────────────────────────────────────────────────────────────────────────────
+
+- name: Create NFS directories and shares on TrueNAS
+  hosts: truenas
+  gather_facts: false
+  tasks:
+    - name: Wait for TrueNAS SSH
+      wait_for_connection:
+        timeout: 30
+
+    - name: Create base k3s directory on TrueNAS
+      shell: |
+        su - truenas_admin -s /bin/bash -c "mkdir -p {{ truenas_nfs_base_path }}"
+      become: false
+
+    - name: Create per-app NFS directories
+      shell: |
+        su - truenas_admin -s /bin/bash -c "mkdir -p {{ item.path }} && chmod 777 {{ item.path }}"
+      loop: "{{ nfs_shares }}"
+      become: false
+
+    - name: Configure NFS shares via TrueNAS CLI
+      shell: |
+        su - truenas_admin -s /bin/bash -c "
+          midclt call sharing.nfs.create '{
+            \"path\": \"{{ item.path }}\",
+            \"comment\": \"k3s-{{ item.path | basename }}\",
+            \"hosts\": [],
+            \"alldirs\": false,
+            \"ro\": false,
+            \"quiet\": false,
+            \"maproot_user\": \"\",
+            \"maproot_group\": \"\",
+            \"mapall_user\": \"nobody\",
+            \"mapall_group\": \"nogroup\",
+            \"security\": [],
+            \"networks\": [\"{{ nfs_allowed_cidr }}\"]
+          }' 2>/dev/null || echo 'Share may already exist'
+        "
+      loop: "{{ nfs_shares }}"
+      become: false
+      ignore_errors: true
+
+    - name: Restart NFS service on TrueNAS
+      shell: |
+        su - truenas_admin -s /bin/bash -c "
+          midclt call service.restart nfs
+        "
+      become: false
+      ignore_errors: true
+
+################################################################################
+- name: Install MetalLB for LoadBalancer IPs
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: Add MetalLB Helm repo
+      command: helm repo add metallb https://metallb.github.io/metallb
+      changed_when: false
+
+    - name: Update Helm repos
+      command: helm repo update
+      changed_when: false
+
+    - name: Create MetalLB namespace
+      command: kubectl create namespace {{ metallb_namespace }}
+      ignore_errors: true
+
+    - name: Install MetalLB
+      command: >
+        helm upgrade --install metallb metallb/metallb
+        --namespace {{ metallb_namespace }}
+        --wait --timeout 5m
+      changed_when: false
+
+    - name: Wait for MetalLB pods
+      command: kubectl -n {{ metallb_namespace }} rollout status deployment/metallb-controller --timeout=120s
+      changed_when: false
+
+    - name: Apply MetalLB IP address pool
+      shell: |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: metallb.io/v1beta1
+        kind: IPAddressPool
+        metadata:
+          name: k3s-pool
+          namespace: {{ metallb_namespace }}
+        spec:
+          addresses:
+            - {{ metallb_ip_range }}
+        ---
+        apiVersion: metallb.io/v1beta1
+        kind: L2Advertisement
+        metadata:
+          name: k3s-l2
+          namespace: {{ metallb_namespace }}
+        spec:
+          ipAddressPools:
+            - k3s-pool
+        EOF
+
+################################################################################
+- name: Install NFS StorageClass (nfs-subdir-external-provisioner)
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: Add NFS provisioner Helm repo
+      command: helm repo add nfs-subdir-external-provisioner https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
+      changed_when: false
+
+    - name: Update Helm repos
+      command: helm repo update
+      changed_when: false
+
+    - name: Create storage namespace
+      command: kubectl create namespace storage
+      ignore_errors: true
+
+    - name: Install NFS subdir provisioner
+      command: >
+        helm upgrade --install nfs-provisioner
+        nfs-subdir-external-provisioner/nfs-subdir-external-provisioner
+        --namespace storage
+        --set nfs.server={{ truenas_ip }}
+        --set nfs.path={{ truenas_nfs_base_path }}
+        --set storageClass.name={{ nfs_storageclass_name }}
+        --set storageClass.defaultClass=true
+        --set storageClass.reclaimPolicy=Retain
+        --set storageClass.archiveOnDelete=false
+        --version {{ nfs_provisioner_version }}
+        --wait --timeout 5m
+      changed_when: false
+
+    - name: Verify StorageClass created
+      command: kubectl get storageclass
+      register: sc_output
+      changed_when: false
+
+    - name: Show StorageClasses
+      debug:
+        msg: "{{ sc_output.stdout_lines }}"
+
+################################################################################
+- name: Install Traefik Ingress Controller
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: Add Traefik Helm repo
+      command: helm repo add traefik https://traefik.github.io/charts
+      changed_when: false
+
+    - name: Update Helm repos
+      command: helm repo update
+      changed_when: false
+
+    - name: Create Traefik namespace
+      command: kubectl create namespace {{ traefik_namespace }}
+      ignore_errors: true
+
+    - name: Install Traefik
+      command: >
+        helm upgrade --install traefik traefik/traefik
+        --namespace {{ traefik_namespace }}
+        --version {{ traefik_version }}
+        --set service.type=LoadBalancer
+        --set service.spec.loadBalancerIP={{ traefik_lb_ip }}
+        --set ports.web.redirectTo.port=websecure
+        --set ports.websecure.tls.enabled=true
+        --set logs.general.level=INFO
+        --wait --timeout 5m
+      changed_when: false
+
+    - name: Verify Traefik deployment
+      command: kubectl -n {{ traefik_namespace }} get svc traefik
+      register: traefik_svc
+      changed_when: false
+
+    - name: Show Traefik service
+      debug:
+        msg: "{{ traefik_svc.stdout_lines }}"

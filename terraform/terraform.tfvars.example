@@ -1,0 +1,33 @@
+# Copy to terraform.tfvars and fill in — DO NOT COMMIT terraform.tfvars
+# Or export as env vars: export TF_VAR_proxmox_api_token="..."
+
+proxmox_host1_ip   = "192.168.100.100"
+proxmox_host2_ip   = "192.168.100.200"
+proxmox_api_token  = "CHANGE_ME_PROXMOX_API_TOKEN"
+proxmox_ssh_user   = "root"
+
+# Template IDs (created by scripts/00-create-proxmox-template.sh):
+#   9000 = Ubuntu 22.04 LTS (jammy)   → set vm_user = "ubuntu"
+#   9001 = Debian 12 (bookworm)       → set vm_user = "debian"  ← recommended
+vm_template_id     = 9001
+vm_storage_pool    = "local-lvm"   # your Proxmox storage pool
+vm_network_bridge  = "vmbr0"
+vm_gateway         = "192.168.100.1"
+vm_dns             = "192.168.100.1"
+
+# paste output of: cat ~/.ssh/id_ed25519.pub
+ssh_public_key     = "ssh-ed25519 AAAA..."
+vm_user            = "debian"      # must match template: ubuntu (9000) or debian (9001)
+
+master_ip          = "192.168.100.110"
+worker01_ip        = "192.168.100.111"
+worker02_ip        = "192.168.100.112"
+worker03_ip        = "192.168.100.113"
+
+master_cpu         = 2
+master_ram_mb      = 4096
+master_disk_gb     = 40
+
+worker_cpu         = 2
+worker_ram_mb      = 4096
+worker_disk_gb     = 40

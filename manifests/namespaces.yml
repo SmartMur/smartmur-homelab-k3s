@@ -1,0 +1,56 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: apps
+  labels:
+    tier: standard
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: vaultwarden
+  labels:
+    tier: critical
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: authentik
+  labels:
+    tier: critical
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: n8n
+  labels:
+    tier: standard
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: discourse
+  labels:
+    tier: standard
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: storage
+  labels:
+    tier: infra
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: traefik
+  labels:
+    tier: infra
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: metallb-system
+  labels:
+    tier: infra

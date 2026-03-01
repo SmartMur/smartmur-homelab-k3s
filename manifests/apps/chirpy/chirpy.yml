@@ -1,0 +1,172 @@
+---
+# Chirpy Jekyll Blog
+# Uses Jekyll+Chirpy theme init container to build site, nginx:alpine to serve
+# To update content: edit the ConfigMap below and rollout restart deployment/chirpy
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: chirpy-site
+  namespace: apps
+data:
+  _config.yml: |
+    title: LABing
+    tagline: Homelab Notes
+    description: Self-hosted homelab documentation and notes
+    url: "https://blog.kwe2.org"
+    author:
+      name: ray
+    timezone: America/Toronto
+    theme: jekyll-theme-chirpy
+    paginate: 10
+    markdown: kramdown
+    plugins:
+      - jekyll-paginate
+      - jekyll-redirect-from
+      - jekyll-seo-tag
+      - jekyll-archives
+    jekyll-archives:
+      enabled: [categories, tags]
+      type: liquid
+      permalinks:
+        category: /categories/:name/
+        tag: /tags/:name/
+
+  Gemfile: |
+    source "https://rubygems.org"
+    gem "jekyll-theme-chirpy", "~> 7.0"
+    gem "jekyll-paginate"
+    gem "jekyll-redirect-from"
+    gem "jekyll-seo-tag"
+    gem "jekyll-archives"
+
+  index.html: |
+    ---
+    layout: home
+    ---
+
+  index.html: |
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>LABing Blog</title>
+      <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+               max-width: 800px; margin: 80px auto; padding: 0 20px; color: #333; background: #0d1117; color: #e6edf3; }
+        h1 { color: #58a6ff; }
+        a { color: #58a6ff; }
+        .badge { display: inline-block; background: #1f6feb; color: white; padding: 3px 10px; border-radius: 12px; font-size: 12px; margin-right: 8px; }
+      </style>
+    </head>
+    <body>
+      <h1>📝 LABing Blog</h1>
+      <p><span class="badge">Jekyll + Chirpy</span> Coming soon</p>
+      <p>The blog is running. To add content, edit the <code>chirpy-site</code> ConfigMap
+         and restart the deployment. Full Jekyll theme will be built once external gem access is available.</p>
+      <hr>
+      <p><a href="https://home.kwe2.org">← Back to Dashboard</a></p>
+    </body>
+    </html>
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: chirpy-built
+  namespace: apps
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chirpy
+  namespace: apps
+  labels:
+    app: chirpy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chirpy
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: chirpy
+    spec:
+      initContainers:
+        - name: copy-site
+          image: busybox:latest
+          command:
+            - sh
+            - -c
+            - cp /configmap/index.html /site/index.html && echo "Site ready"
+          volumeMounts:
+            - name: site
+              mountPath: /site
+            - name: configmap
+              mountPath: /configmap
+      containers:
+        - name: nginx
+          image: nginx:alpine
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: site
+              mountPath: /usr/share/nginx/html
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 30
+      volumes:
+        - name: configmap
+          configMap:
+            name: chirpy-site
+        - name: site
+          persistentVolumeClaim:
+            claimName: chirpy-built
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: chirpy
+  namespace: apps
+spec:
+  selector:
+    app: chirpy
+  ports:
+    - port: 80
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: chirpy
+  namespace: apps
+spec:
+  entryPoints: [websecure]
+  routes:
+    - match: Host(`blog.kwe2.org`)
+      kind: Rule
+      services:
+        - name: chirpy
+          port: 80
+  tls: {}

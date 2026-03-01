@@ -1,0 +1,190 @@
+---
+# ──────────────────────────────────────────────────────────────────────────────
+# Playbook: Install k3s cluster (master + workers)
+# Run: ansible-playbook -i inventory.yml playbook-k3s.yml
+# ──────────────────────────────────────────────────────────────────────────────
+
+- name: Pre-flight — prepare all nodes
+  hosts: k3s_cluster
+  become: true
+  tasks:
+    - name: Update apt cache and upgrade packages
+      apt:
+        update_cache: true
+        upgrade: dist
+        cache_valid_time: 3600
+
+    - name: Install required packages
+      apt:
+        name:
+          - curl
+          - wget
+          - git
+          - nfs-common
+          - open-iscsi
+          - jq
+          - ca-certificates
+          - apt-transport-https
+        state: present
+
+    - name: Disable swap
+      command: swapoff -a
+      changed_when: false
+
+    - name: Remove swap from fstab
+      replace:
+        path: /etc/fstab
+        regexp: '^([^#].*\s+swap\s+.*)$'
+        replace: '# \1'
+
+    - name: Load required kernel modules
+      modprobe:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - overlay
+        - br_netfilter
+
+    - name: Persist kernel modules
+      copy:
+        dest: /etc/modules-load.d/k3s.conf
+        content: |
+          overlay
+          br_netfilter
+
+    - name: Set sysctl params for Kubernetes
+      sysctl:
+        name: "{{ item.key }}"
+        value: "{{ item.value }}"
+        state: present
+        reload: true
+      loop:
+        - { key: "net.bridge.bridge-nf-call-iptables",  value: "1" }
+        - { key: "net.bridge.bridge-nf-call-ip6tables", value: "1" }
+        - { key: "net.ipv4.ip_forward",                 value: "1" }
+
+    - name: Set hostname
+      hostname:
+        name: "{{ inventory_hostname }}"
+
+    - name: Ensure resolved.conf.d directory exists
+      file:
+        path: /etc/systemd/resolved.conf.d
+        state: directory
+        mode: "0755"
+
+    - name: Add 8.8.8.8 DNS fallback (local DNS may not resolve public names)
+      copy:
+        dest: /etc/systemd/resolved.conf.d/fallback-dns.conf
+        content: |
+          [Resolve]
+          FallbackDNS=8.8.8.8 1.1.1.1
+        mode: "0644"
+      notify: restart systemd-resolved
+
+  handlers:
+    - name: restart systemd-resolved
+      systemd:
+        name: systemd-resolved
+        state: restarted
+
+################################################################################
+- name: Install k3s master
+  hosts: k3s_master
+  become: true
+  tasks:
+    - name: Install k3s server
+      shell: |
+        curl -sfL https://get.k3s.io | \
+        INSTALL_K3S_VERSION="{{ k3s_version }}" \
+        K3S_TOKEN="{{ k3s_token }}" \
+        sh -s - server \
+        --disable=servicelb \
+        --disable=traefik \
+        --write-kubeconfig-mode=644 \
+        --cluster-cidr=10.42.0.0/16 \
+        --service-cidr=10.43.0.0/16
+      args:
+        creates: /usr/local/bin/k3s
+
+    - name: Wait for k3s to be ready
+      wait_for:
+        path: /etc/rancher/k3s/k3s.yaml
+        state: present
+        timeout: 300
+
+    - name: Wait for node to be Ready
+      shell: k3s kubectl get nodes --no-headers | grep -c "Ready"
+      register: node_ready
+      until: node_ready.stdout | int >= 1
+      retries: 20
+      delay: 10
+      changed_when: false
+
+    - name: Fetch kubeconfig to Mac
+      fetch:
+        src: /etc/rancher/k3s/k3s.yaml
+        dest: "{{ playbook_dir }}/../kubeconfig-raw.yml"
+        flat: true
+
+    - name: Fetch k3s join token
+      slurp:
+        src: /var/lib/rancher/k3s/server/node-token
+      register: k3s_node_token
+
+    - name: Save token to local file (used by workers)
+      ansible.builtin.copy:
+        content: "{{ k3s_node_token['content'] | b64decode | trim }}"
+        dest: "{{ playbook_dir }}/../.k3s-node-token"
+        mode: "0600"
+      delegate_to: localhost
+
+################################################################################
+- name: Install k3s workers
+  hosts: k3s_workers
+  become: true
+  vars:
+    k3s_node_token: "{{ lookup('file', playbook_dir + '/../.k3s-node-token') }}"
+  tasks:
+    - name: Install k3s agent
+      shell: |
+        curl -sfL https://get.k3s.io | \
+        INSTALL_K3S_VERSION="{{ k3s_version }}" \
+        K3S_TOKEN="{{ k3s_node_token }}" \
+        K3S_URL="https://{{ k3s_master_ip }}:6443" \
+        sh -s - agent
+      args:
+        creates: /usr/local/bin/k3s
+
+    - name: Wait for agent to join
+      wait_for:
+        path: /var/lib/rancher/k3s/agent/kubelet.kubeconfig
+        state: present
+        timeout: 300
+
+################################################################################
+- name: Fix kubeconfig on Mac
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: Replace 127.0.0.1 with master IP in kubeconfig
+      replace:
+        path: "{{ playbook_dir }}/../kubeconfig-raw.yml"
+        regexp: 'https://127\.0\.0\.1:6443'
+        replace: "https://{{ k3s_master_ip }}:6443"
+
+    - name: Copy kubeconfig to ~/.kube/config
+      copy:
+        src: "{{ playbook_dir }}/../kubeconfig-raw.yml"
+        dest: "~/.kube/config"
+        mode: "0600"
+        backup: true
+
+    - name: Verify cluster connectivity
+      command: kubectl get nodes -o wide
+      register: nodes_output
+      changed_when: false
+
+    - name: Show cluster nodes
+      debug:
+        msg: "{{ nodes_output.stdout_lines }}"
