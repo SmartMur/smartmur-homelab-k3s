@@ -345,4 +345,3 @@ Tags: #checklist #recovery #reproducible
 - [ ] Secrets created (`manifests/secrets/README.md`)
 - [ ] Apps deployed (`04-deploy-apps.sh`)
 - [ ] Health validated (`kubectl get pods -A`)
-

@@ -8,14 +8,14 @@
 
 Production-oriented automation for provisioning and operating a multi-node k3s cluster across Proxmox hosts, with TrueNAS-backed persistent storage and Traefik ingress.
 
-Beginner journey (from scratch): `docs/BEGINNER_JOURNEY.md`  
-Quick operator start: `docs/GETTING_STARTED.md`  
-Kubernetes manager + Dockhand sync: `docs/DOCKHAND_HEADLAMP_WORKFLOW.md`  
-Notify monitoring + alerting: `docs/NOTIFY_MONITORING.md`  
-Latest live ops audit: `docs/OPERATIONS_AUDIT_2026-02-22.md`  
-Contributing: `CONTRIBUTING.md`  
-Security policy: `SECURITY.md`  
-Security rulebook: `docs/SECURITY_RULEBOOK.md`  
+Beginner journey (from scratch): `docs/BEGINNER_JOURNEY.md`
+Quick operator start: `docs/GETTING_STARTED.md`
+Kubernetes manager + Dockhand sync: `docs/DOCKHAND_HEADLAMP_WORKFLOW.md`
+Notify monitoring + alerting: `docs/NOTIFY_MONITORING.md`
+Latest live ops audit: `docs/OPERATIONS_AUDIT_2026-02-22.md`
+Contributing: `CONTRIBUTING.md`
+Security policy: `SECURITY.md`
+Security rulebook: `docs/SECURITY_RULEBOOK.md`
 Deep environment reference: `STACK.md`
 
 ## Overview
