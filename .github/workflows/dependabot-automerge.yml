@@ -23,6 +23,12 @@ jobs:
       cancel-in-progress: true
 
     steps:
+      - name: Fetch Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@dbb049abf0d677abbd7f7eee0375145b417fdd34  # v2
+        with:
+          github-token: ${{ github.token }}
+
       - name: Update branch to latest main
         env:
           GH_TOKEN: ${{ github.token }}

@@ -50,7 +50,7 @@ create_template() {
 
   info "Creating template $TMPL_ID ($VM_NAME) on $HOST..."
 
-  ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -o ServerAliveCountMax=10 root@"$HOST" bash <<REMOTE
+  ssh -o StrictHostKeyChecking=accept-new -o ServerAliveInterval=30 -o ServerAliveCountMax=10 root@"$HOST" bash <<REMOTE
 set -euo pipefail
 cd /tmp
 
