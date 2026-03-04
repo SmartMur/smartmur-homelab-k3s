@@ -319,7 +319,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`notify.kwe2.org`)
+    - match: Host(`notify.smartmur.ca`)
       kind: Rule
       services:
         - name: notify

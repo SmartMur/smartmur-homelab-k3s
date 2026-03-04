@@ -12,7 +12,7 @@ k3s_cluster:
       hosts:
         k3s-master-01:
           ansible_host: 192.168.100.110
-          # .110 was previously logg.kwe2.org — router blocks direct SSH; route via PVE2 (PVE1 also works when available)
+          # .110 was previously logg.smartmur.ca — router blocks direct SSH; route via PVE2 (PVE1 also works when available)
           ansible_ssh_common_args: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ProxyJump=root@192.168.100.200"
     k3s_workers:
       hosts:

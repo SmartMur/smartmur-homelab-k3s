@@ -88,7 +88,7 @@ NEW_ADMIN=$(openssl rand -hex 32)
 
 kubectl create secret generic vaultwarden-secret -n vaultwarden \
   --from-literal=ADMIN_TOKEN="${NEW_ADMIN}" \
-  --from-literal=DOMAIN='https://vault.kwe2.org' \
+  --from-literal=DOMAIN='https://vault.smartmur.ca' \
   --dry-run=client -o yaml | kubectl apply -f -
 
 kubectl rollout restart deployment/vaultwarden -n vaultwarden
@@ -130,7 +130,7 @@ kubectl create secret generic n8n-secret -n n8n \
   --from-literal=DB_TYPE='sqlite' \
   --from-literal=N8N_ENCRYPTION_KEY='KEEP_EXISTING_UNLESS_COMPROMISED' \
   --from-literal=N8N_USER_MANAGEMENT_JWT_SECRET="${NEW_JWT}" \
-  --from-literal=WEBHOOK_URL='https://n8n.kwe2.org' \
+  --from-literal=WEBHOOK_URL='https://n8n.smartmur.ca' \
   --dry-run=client -o yaml | kubectl apply -f -
 
 kubectl rollout restart deployment/n8n -n n8n
@@ -228,16 +228,16 @@ Run these checks after rotating each secret category.
 |---|---|---|
 | Proxmox API token | `cd terraform && terraform plan` | Plan succeeds, no auth errors |
 | k3s token | `kubectl get nodes` | All nodes `Ready` |
-| Vaultwarden | `curl -sf https://vault.kwe2.org/alive` | HTTP 200 |
-| Authentik | `curl -sf https://auth.kwe2.org/-/health/live/` | HTTP 200 |
-| n8n | `curl -sf https://n8n.kwe2.org/healthz` | HTTP 200 |
-| Code Server | `curl -sf -o /dev/null -w '%{http_code}' https://code.kwe2.org` | HTTP 200/302 |
-| Pangolin | `curl -sf -o /dev/null -w '%{http_code}' https://pangolin.kwe2.org` | HTTP 200/302 |
+| Vaultwarden | `curl -sf https://vault.smartmur.ca/alive` | HTTP 200 |
+| Authentik | `curl -sf https://auth.smartmur.ca/-/health/live/` | HTTP 200 |
+| n8n | `curl -sf https://n8n.smartmur.ca/healthz` | HTTP 200 |
+| Code Server | `curl -sf -o /dev/null -w '%{http_code}' https://code.smartmur.ca` | HTTP 200/302 |
+| Pangolin | `curl -sf -o /dev/null -w '%{http_code}' https://pangolin.smartmur.ca` | HTTP 200/302 |
 | Discourse | `kubectl logs -n discourse deploy/discourse --tail=20` | No crash loops |
 | Notify channels | Trigger a test alert via n8n or monitoring | Alert arrives on Telegram/email |
 | SSH keys | `ssh K8-Master hostname` | Returns hostname |
-| NPM admin | Log in at https://npm.kwe2.org | Login succeeds |
-| Cloudflare token | Check cert renewal: NPM SSL → `*.kwe2.org` expiry date | Cert valid |
+| NPM admin | Log in at https://npm.smartmur.ca | Login succeeds |
+| Cloudflare token | Check cert renewal: NPM SSL → `*.smartmur.ca` expiry date | Cert valid |
 
 Full cluster health check after any rotation:
 

@@ -106,7 +106,7 @@ metadata:
 spec:
   entryPoints: [websecure]
   routes:
-    - match: Host(`obsidian.kwe2.org`)
+    - match: Host(`obsidian.smartmur.ca`)
       kind: Rule
       services:
         - name: obsidian

@@ -65,7 +65,7 @@ spec:
             - containerPort: 8080
           env:
             - name: PROXY_DOMAIN
-              value: code.kwe2.org
+              value: code.smartmur.ca
             - name: EXTENSIONS_GALLERY
               value: '{"serviceUrl":"https://marketplace.visualstudio.com/_apis/public/gallery","itemUrl":"https://marketplace.visualstudio.com/items","cacheUrl":"https://vscode.blob.core.windows.net/gallery/index","resourceUrlTemplate":"https://marketplace.visualstudio.com/_apis/public/gallery/publishers/{publisher}/vsextensions/{name}/{version}/vspackage"}'
           envFrom:
@@ -116,7 +116,7 @@ metadata:
 spec:
   entryPoints: [websecure]
   routes:
-    - match: Host(`code.kwe2.org`)
+    - match: Host(`code.smartmur.ca`)
       kind: Rule
       services:
         - name: code-server

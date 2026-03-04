@@ -36,68 +36,68 @@ data:
   services.yaml: |
     - Infrastructure:
         - Traefik:
-            href: https://traefik.kwe2.org
+            href: https://traefik.smartmur.ca
             description: Ingress Controller
             icon: traefik.png
         - Vaultwarden:
-            href: https://vault.kwe2.org
+            href: https://vault.smartmur.ca
             description: Password Manager
             icon: bitwarden.png
             siteMonitor: http://vaultwarden.vaultwarden/alive
         - Authentik:
-            href: https://auth.kwe2.org
+            href: https://auth.smartmur.ca
             description: SSO / Identity Provider
             icon: authentik.png
             siteMonitor: http://authentik.authentik:9000/-/health/live/
         - Pangolin:
-            href: https://pangolin.kwe2.org
+            href: https://pangolin.smartmur.ca
             description: Tunnel / Mesh Network
             icon: wireguard.png
             siteMonitor: http://pangolin:3002
         - Headlamp:
-            href: https://k8s.kwe2.org
+            href: https://k8s.smartmur.ca
             description: Kubernetes Cluster Manager
             icon: kubernetes.png
             siteMonitor: http://headlamp
     - Apps:
         - n8n:
-            href: https://n8n.kwe2.org
+            href: https://n8n.smartmur.ca
             description: Workflow Automation
             icon: n8n.png
             siteMonitor: http://n8n.n8n:5678/healthz
         - Code Server:
-            href: https://code.kwe2.org
+            href: https://code.smartmur.ca
             description: Browser IDE
             icon: code-server.png
             siteMonitor: http://code-server:8080/healthz
         - Obsidian:
-            href: https://obsidian.kwe2.org
+            href: https://obsidian.smartmur.ca
             description: Knowledge Base
             icon: obsidian.png
             siteMonitor: http://obsidian:3000
         - Dockhand:
-            href: https://dockhand2.kwe2.org
+            href: https://dockhand2.smartmur.ca
             description: Docker/Hawser Fleet Control
             icon: kubernetes.png
             siteMonitor: http://dockhand:3000/api/health
         - Notify:
-            href: https://notify.kwe2.org
+            href: https://notify.smartmur.ca
             description: Infrastructure Monitoring + Alerts
             icon: mdi-bell-alert
             siteMonitor: http://notify:9090/readyz
     - Content:
         - Blog:
-            href: https://blog.kwe2.org
+            href: https://blog.smartmur.ca
             description: Chirpy Jekyll Blog
             icon: jekyll.png
             siteMonitor: http://chirpy
         - Discourse:
-            href: https://forum.kwe2.org
+            href: https://forum.smartmur.ca
             description: Community Forum
             icon: discourse.png
             siteMonitor: http://discourse.discourse:3000
         - Mailhog:
-            href: https://mail.kwe2.org
+            href: https://mail.smartmur.ca
             description: Email Testing
             icon: email.png
             siteMonitor: http://mailhog.discourse:8025
@@ -111,7 +111,7 @@ data:
             description: Storage and Relay
             icon: truenas.png
         - NPM:
-            href: https://npm.kwe2.org
+            href: https://npm.smartmur.ca
             description: Edge Proxy Manager
             icon: nginx.png
 
@@ -151,14 +151,14 @@ data:
         - TrueNAS:
             - href: https://192.168.13.69
         - NPM:
-            - href: https://npm.kwe2.org
+            - href: https://npm.smartmur.ca
     - Ops:
         - Traefik Dashboard:
-            - href: https://traefik.kwe2.org/dashboard/
+            - href: https://traefik.smartmur.ca/dashboard/
         - Headlamp:
-            - href: https://k8s.kwe2.org
+            - href: https://k8s.smartmur.ca
         - Authentik Admin:
-            - href: https://auth.kwe2.org
+            - href: https://auth.smartmur.ca
         - k3s Repo:
             - href: https://github.com/Light-Heart-Labs/MurzDev_env
 
@@ -269,7 +269,7 @@ spec:
             - containerPort: 3000
           env:
             - name: HOMEPAGE_ALLOWED_HOSTS
-              value: "home.kwe2.org"
+              value: "home.smartmur.ca"
           volumeMounts:
             - name: config-rw
               mountPath: /app/config
@@ -332,7 +332,7 @@ metadata:
 spec:
   entryPoints: [websecure]
   routes:
-    - match: Host(`home.kwe2.org`)
+    - match: Host(`home.smartmur.ca`)
       kind: Rule
       services:
         - name: homepage

@@ -78,7 +78,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`k8s.kwe2.org`)
+    - match: Host(`k8s.smartmur.ca`)
       kind: Rule
       services:
         - name: headlamp

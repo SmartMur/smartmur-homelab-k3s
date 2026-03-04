@@ -251,7 +251,7 @@ metadata:
 spec:
   entryPoints: [websecure]
   routes:
-    - match: Host(`auth.kwe2.org`)
+    - match: Host(`auth.smartmur.ca`)
       kind: Rule
       services:
         - name: authentik

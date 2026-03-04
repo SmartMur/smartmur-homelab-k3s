@@ -11,11 +11,11 @@
 Internet
     │
     ▼
-Cloudflare DNS (*.kwe2.org → 192.168.30.117)
+Cloudflare DNS (*.smartmur.ca → 192.168.30.117)
     │
     ▼
 NPM — Nginx Proxy Manager (192.168.30.117:443)
-  ├── TLS termination via *.kwe2.org Let's Encrypt wildcard (Cloudflare DNS challenge)
+  ├── TLS termination via *.smartmur.ca Let's Encrypt wildcard (Cloudflare DNS challenge)
   └── Forwards to TrueNAS relay
     │
     ▼
@@ -100,31 +100,31 @@ Two DNS layers:
 - **Cloudflare** — authoritative for `kwe2.org` in public Internet
 - **Unifi internal DNS** (192.168.13.13) — authoritative internally, does NOT forward to Cloudflare
 
-All `*.kwe2.org` subdomains must exist in BOTH:
+All `*.smartmur.ca` subdomains must exist in BOTH:
 
 | Subdomain | Cloudflare | Unifi | Points to |
 |---|---|---|---|
-| home.kwe2.org | ✓ | ✓ | 192.168.30.117 (NPM) |
-| vault.kwe2.org | ✓ | ✓ | 192.168.30.117 (NPM) |
-| auth.kwe2.org | ✓ | ✓ | 192.168.30.117 (NPM) |
-| n8n.kwe2.org | ✓ | ✓ | 192.168.30.117 (NPM) |
-| code.kwe2.org | ✓ | ✓ | 192.168.30.117 (NPM) |
-| obsidian.kwe2.org | ✓ | ✓ | 192.168.30.117 (NPM) |
-| blog.kwe2.org | ✓ | ✓ | 192.168.30.117 (NPM) |
-| traefik.kwe2.org | ✓ | ✓ | 192.168.30.117 (NPM) |
-| dockhand2.kwe2.org | ✓ | ✓ | 192.168.30.117 (NPM) |
-| k8s.kwe2.org | ✓ | add manually | 192.168.30.117 (NPM) |
-| pangolin.kwe2.org | ✓ | add manually | 192.168.30.117 (NPM) |
-| mail.kwe2.org | ✓ | add manually | 192.168.30.117 (NPM) |
-| forum.kwe2.org | ✓ | add manually | 192.168.30.117 (NPM) |
+| home.smartmur.ca | ✓ | ✓ | 192.168.30.117 (NPM) |
+| vault.smartmur.ca | ✓ | ✓ | 192.168.30.117 (NPM) |
+| auth.smartmur.ca | ✓ | ✓ | 192.168.30.117 (NPM) |
+| n8n.smartmur.ca | ✓ | ✓ | 192.168.30.117 (NPM) |
+| code.smartmur.ca | ✓ | ✓ | 192.168.30.117 (NPM) |
+| obsidian.smartmur.ca | ✓ | ✓ | 192.168.30.117 (NPM) |
+| blog.smartmur.ca | ✓ | ✓ | 192.168.30.117 (NPM) |
+| traefik.smartmur.ca | ✓ | ✓ | 192.168.30.117 (NPM) |
+| dockhand2.smartmur.ca | ✓ | ✓ | 192.168.30.117 (NPM) |
+| k8s.smartmur.ca | ✓ | add manually | 192.168.30.117 (NPM) |
+| pangolin.smartmur.ca | ✓ | add manually | 192.168.30.117 (NPM) |
+| mail.smartmur.ca | ✓ | add manually | 192.168.30.117 (NPM) |
+| forum.smartmur.ca | ✓ | add manually | 192.168.30.117 (NPM) |
 
 > **Note**: If a new subdomain resolves externally but not internally, add it in Unifi → Network → DNS Records.
 
 ### NPM (Nginx Proxy Manager)
 
-- **URL**: https://npm.kwe2.org
+- **URL**: https://npm.smartmur.ca
 - **Credentials**: Store in password manager only (do not document plaintext in repo)
-- **Wildcard cert**: `*.kwe2.org` (cert ID 1, via Cloudflare DNS challenge)
+- **Wildcard cert**: `*.smartmur.ca` (cert ID 1, via Cloudflare DNS challenge)
 - All proxy hosts forward to `192.168.13.69:19200` (TrueNAS relay)
 
 ### TrueNAS Relay
@@ -191,25 +191,25 @@ ssh ray@192.168.13.69 "ls /mnt/strange/NSF_Prox/k3s/"
 
 | Service | URL | Notes |
 |---|---|---|
-| Traefik Dashboard | https://traefik.kwe2.org/dashboard/ | No auth (internal only) |
-| NPM | https://npm.kwe2.org | See credentials above |
-| Authentik | https://auth.kwe2.org | SSO provider |
-| Vaultwarden | https://vault.kwe2.org | Password manager |
-| Dockhand | https://dockhand2.kwe2.org | Docker/Hawser management (not native Kubernetes API) |
-| Headlamp | https://k8s.kwe2.org | Native Kubernetes web manager |
-| Pangolin | https://pangolin.kwe2.org | WireGuard tunneled proxy |
+| Traefik Dashboard | https://traefik.smartmur.ca/dashboard/ | No auth (internal only) |
+| NPM | https://npm.smartmur.ca | See credentials above |
+| Authentik | https://auth.smartmur.ca | SSO provider |
+| Vaultwarden | https://vault.smartmur.ca | Password manager |
+| Dockhand | https://dockhand2.smartmur.ca | Docker/Hawser management (not native Kubernetes API) |
+| Headlamp | https://k8s.smartmur.ca | Native Kubernetes web manager |
+| Pangolin | https://pangolin.smartmur.ca | WireGuard tunneled proxy |
 
 ### Application Services
 
 | Service | URL | Notes |
 |---|---|---|
-| Homepage | https://home.kwe2.org | Dashboard, no auth |
-| n8n | https://n8n.kwe2.org | Workflow automation |
-| Code Server | https://code.kwe2.org | Browser IDE |
-| Obsidian | https://obsidian.kwe2.org | Knowledge base (KasmVNC) |
-| Chirpy Blog | https://blog.kwe2.org | Jekyll blog |
-| Discourse | https://forum.kwe2.org | Forum (offline — see below) |
-| Mailhog | https://mail.kwe2.org | SMTP catch-all (dev use) |
+| Homepage | https://home.smartmur.ca | Dashboard, no auth |
+| n8n | https://n8n.smartmur.ca | Workflow automation |
+| Code Server | https://code.smartmur.ca | Browser IDE |
+| Obsidian | https://obsidian.smartmur.ca | Knowledge base (KasmVNC) |
+| Chirpy Blog | https://blog.smartmur.ca | Jekyll blog |
+| Discourse | https://forum.smartmur.ca | Forum (offline — see below) |
+| Mailhog | https://mail.smartmur.ca | SMTP catch-all (dev use) |
 
 ---
 
@@ -234,7 +234,7 @@ ssh ray@192.168.13.69 "ls /mnt/strange/NSF_Prox/k3s/"
 > ```bash
 > kubectl create secret generic vaultwarden-secret -n vaultwarden \
 >   --from-literal=ADMIN_TOKEN='new_token' \
->   --from-literal=DOMAIN='https://vault.kwe2.org' \
+>   --from-literal=DOMAIN='https://vault.smartmur.ca' \
 >   --dry-run=client -o yaml | kubectl apply -f -
 > ```
 
@@ -315,7 +315,7 @@ metadata:
 spec:
   entryPoints: [websecure]
   routes:
-    - match: Host(`myapp.kwe2.org`)
+    - match: Host(`myapp.smartmur.ca`)
       kind: Rule
       services:
         - name: myapp
@@ -325,15 +325,15 @@ spec:
 
 2. **Apply**: `kubectl apply -f manifests/apps/myapp/myapp.yml`
 
-3. **Add NPM proxy host** via https://npm.kwe2.org:
-   - Domain: `myapp.kwe2.org`
+3. **Add NPM proxy host** via https://npm.smartmur.ca:
+   - Domain: `myapp.smartmur.ca`
    - Forward: `192.168.13.69:19200`
-   - Certificate: `*.kwe2.org` (ID 1)
+   - Certificate: `*.smartmur.ca` (ID 1)
    - Enable WebSocket if needed
 
 4. **Add DNS records**:
-   - Cloudflare: A record `myapp.kwe2.org → 192.168.30.117`
-   - Unifi DNS: A record `myapp.kwe2.org → 192.168.30.117`
+   - Cloudflare: A record `myapp.smartmur.ca → 192.168.30.117`
+   - Unifi DNS: A record `myapp.smartmur.ca → 192.168.30.117`
 
 ---
 
@@ -355,7 +355,7 @@ kubectl scale deployment discourse -n discourse --replicas=1
 # Watch logs:
 kubectl logs -n discourse deployment/discourse -f
 # Admin: CHANGE_ME_DISCOURSE_ADMIN_EMAIL / CHANGE_ME_DISCOURSE_ADMIN_PASSWORD
-# Emails captured by Mailhog at https://mail.kwe2.org
+# Emails captured by Mailhog at https://mail.smartmur.ca
 ```
 
 ---
@@ -383,7 +383,7 @@ The blog is built from a Jekyll ConfigMap using the Chirpy theme.
 
 1. Check pod is running: `kubectl get pods -n <namespace>`
 2. Check TrueNAS relay: `ssh ray@192.168.13.69 "nginx -c /mnt/strange/ray/k3s-relay/nginx.conf -t"`
-3. Check Traefik routing: https://traefik.kwe2.org/dashboard/#/http/routers
+3. Check Traefik routing: https://traefik.smartmur.ca/dashboard/#/http/routers
 4. Check NPM proxy host is pointing to `192.168.13.69:19200`
 
 ### App DNS not resolving

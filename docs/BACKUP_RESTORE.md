@@ -240,13 +240,13 @@ kubectl create secret generic n8n-secret -n n8n \
   --from-literal=DB_TYPE='sqlite' \
   --from-literal=N8N_ENCRYPTION_KEY='CHANGE_ME_LONG_RANDOM_SECRET' \
   --from-literal=N8N_USER_MANAGEMENT_JWT_SECRET='CHANGE_ME_LONG_RANDOM_SECRET' \
-  --from-literal=WEBHOOK_URL='https://n8n.kwe2.org' \
+  --from-literal=WEBHOOK_URL='https://n8n.smartmur.ca' \
   --dry-run=client -o yaml | kubectl apply -f -
 
 # vaultwarden namespace
 kubectl create secret generic vaultwarden-secret -n vaultwarden \
   --from-literal=ADMIN_TOKEN='CHANGE_ME_LONG_RANDOM_SECRET' \
-  --from-literal=DOMAIN='https://vault.kwe2.org' \
+  --from-literal=DOMAIN='https://vault.smartmur.ca' \
   --dry-run=client -o yaml | kubectl apply -f -
 
 # discourse namespace
@@ -340,7 +340,7 @@ To redeploy one app without rebuilding the cluster.
 # 1. Recreate the secret
 kubectl create secret generic vaultwarden-secret -n vaultwarden \
   --from-literal=ADMIN_TOKEN='real-token-from-password-manager' \
-  --from-literal=DOMAIN='https://vault.kwe2.org' \
+  --from-literal=DOMAIN='https://vault.smartmur.ca' \
   --dry-run=client -o yaml | kubectl apply -f -
 
 # 2. Apply the manifest
@@ -415,7 +415,7 @@ kubectl get ingressroute -A
 
 ```bash
 # Check each app responds
-for url in vault.kwe2.org n8n.kwe2.org home.kwe2.org auth.kwe2.org code.kwe2.org blog.kwe2.org k8s.kwe2.org; do
+for url in vault.smartmur.ca n8n.smartmur.ca home.smartmur.ca auth.smartmur.ca code.smartmur.ca blog.smartmur.ca k8s.smartmur.ca; do
   echo -n "$url: "; curl -sk -o /dev/null -w "%{http_code}" https://$url; echo
 done
 ```

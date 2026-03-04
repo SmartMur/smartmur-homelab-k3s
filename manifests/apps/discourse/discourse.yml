@@ -32,7 +32,7 @@ spec:
 
 ---
 # ── Mailhog — local SMTP stub (catches all outbound email) ────────────────────
-# Access web UI at https://mail.kwe2.org to read captured emails
+# Access web UI at https://mail.smartmur.ca to read captured emails
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -86,7 +86,7 @@ metadata:
 spec:
   entryPoints: [websecure]
   routes:
-    - match: Host(`mail.kwe2.org`)
+    - match: Host(`mail.smartmur.ca`)
       kind: Rule
       services:
         - name: mailhog
@@ -241,7 +241,7 @@ spec:
             - containerPort: 3000
           env:
             - name: DISCOURSE_HOST
-              value: forum.kwe2.org
+              value: forum.smartmur.ca
             - name: DISCOURSE_DATABASE_HOST
               value: discourse-postgres
             - name: DISCOURSE_DATABASE_USER
@@ -321,7 +321,7 @@ metadata:
 spec:
   entryPoints: [websecure]
   routes:
-    - match: Host(`forum.kwe2.org`)
+    - match: Host(`forum.smartmur.ca`)
       kind: Rule
       services:
         - name: discourse

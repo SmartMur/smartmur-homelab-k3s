@@ -28,7 +28,7 @@ data:
     app:
       log_level: "info"
       save_logs: false
-      dashboard_url: "https://pangolin.kwe2.org"
+      dashboard_url: "https://pangolin.smartmur.ca"
       base_domain: "kwe2.org"
       admin_user_secret_enabled: false
 
@@ -53,7 +53,7 @@ data:
 
     gerbil:
       start_port: 51820
-      base_endpoint: "pangolin.kwe2.org"
+      base_endpoint: "pangolin.smartmur.ca"
       remote_config_endpoint: "http://localhost:3001/v1"
       dns_wait_time: 5
 
@@ -197,12 +197,12 @@ metadata:
 spec:
   entryPoints: [websecure]
   routes:
-    - match: Host(`pangolin.kwe2.org`) && PathPrefix(`/api/v1`)
+    - match: Host(`pangolin.smartmur.ca`) && PathPrefix(`/api/v1`)
       kind: Rule
       services:
         - name: pangolin
           port: 3000
-    - match: Host(`pangolin.kwe2.org`)
+    - match: Host(`pangolin.smartmur.ca`)
       kind: Rule
       services:
         - name: pangolin

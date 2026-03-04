@@ -76,7 +76,7 @@ metadata:
 spec:
   entryPoints: [websecure]
   routes:
-    - match: Host(`dockhand2.kwe2.org`)
+    - match: Host(`dockhand2.smartmur.ca`)
       kind: Rule
       services:
         - name: dockhand

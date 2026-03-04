@@ -101,7 +101,7 @@ metadata:
 spec:
   entryPoints: [websecure]
   routes:
-    - match: Host(`vault.kwe2.org`)
+    - match: Host(`vault.smartmur.ca`)
       kind: Rule
       services:
         - name: vaultwarden

@@ -12,7 +12,7 @@ data:
     title: LABing
     tagline: Homelab Notes
     description: Self-hosted homelab documentation and notes
-    url: "https://blog.kwe2.org"
+    url: "https://blog.smartmur.ca"
     author:
       name: ray
     timezone: America/Toronto
@@ -65,7 +65,7 @@ data:
       <p>The blog is running. To add content, edit the <code>chirpy-site</code> ConfigMap
          and restart the deployment. Full Jekyll theme will be built once external gem access is available.</p>
       <hr>
-      <p><a href="https://home.kwe2.org">← Back to Dashboard</a></p>
+      <p><a href="https://home.smartmur.ca">← Back to Dashboard</a></p>
     </body>
     </html>
 
@@ -164,7 +164,7 @@ metadata:
 spec:
   entryPoints: [websecure]
   routes:
-    - match: Host(`blog.kwe2.org`)
+    - match: Host(`blog.smartmur.ca`)
       kind: Rule
       services:
         - name: chirpy

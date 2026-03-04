@@ -9,7 +9,7 @@ This repo now includes two complementary management paths:
 
 - New app manifest: `manifests/apps/headlamp/headlamp.yml`
 - Homepage integration: `manifests/apps/homepage/homepage.yml`
-  - Adds Headlamp card (`https://k8s.kwe2.org`)
+  - Adds Headlamp card (`https://k8s.smartmur.ca`)
   - Keeps Dockhand card and clarifies Dockhand scope
 - New automation script: `scripts/05-sync-dockhand-contexts.sh`
   - Idempotently creates/updates Dockhand environments named `k8s-<context>`
@@ -40,12 +40,12 @@ kubectl -n apps exec deploy/dockhand -- \
 
 ## DNS / Edge Routing Requirements
 
-For `https://k8s.kwe2.org` to be reachable end-to-end:
+For `https://k8s.smartmur.ca` to be reachable end-to-end:
 
-1. Cloudflare `A` record: `k8s.kwe2.org -> 192.168.30.117`
-2. Unifi local DNS `A` record: `k8s.kwe2.org -> 192.168.30.117`
-3. NPM proxy host for `k8s.kwe2.org` forwarding to `192.168.13.69:19200`
-4. Use wildcard TLS certificate `*.kwe2.org`
+1. Cloudflare `A` record: `k8s.smartmur.ca -> 192.168.30.117`
+2. Unifi local DNS `A` record: `k8s.smartmur.ca -> 192.168.30.117`
+3. NPM proxy host for `k8s.smartmur.ca` forwarding to `192.168.13.69:19200`
+4. Use wildcard TLS certificate `*.smartmur.ca`
 
 ## Security Notes
 

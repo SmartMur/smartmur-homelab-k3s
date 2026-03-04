@@ -112,7 +112,7 @@ Example secret creation:
 ```bash
 kubectl create secret generic vaultwarden-secret -n vaultwarden \
   --from-literal=ADMIN_TOKEN='CHANGE_ME' \
-  --from-literal=DOMAIN='https://vault.kwe2.org' \
+  --from-literal=DOMAIN='https://vault.smartmur.ca' \
   --dry-run=client -o yaml | kubectl apply -f -
 ```
 

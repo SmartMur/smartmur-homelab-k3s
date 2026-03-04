@@ -6,7 +6,7 @@ This runbook deploys `Notify` into the `apps` namespace and adds it to Homepage.
 
 - `Deployment` `notify` (apps namespace)
 - `Service` `notify` on port `9090`
-- `IngressRoute` `notify` at `https://notify.kwe2.org`
+- `IngressRoute` `notify` at `https://notify.smartmur.ca`
 - `ServiceAccount` + read-only `ClusterRole` + `ClusterRoleBinding`
 - namespaced restart `Role` + `RoleBinding` for allowlisted deployments
 - `PersistentVolumeClaim` `notify-data` for alert state persistence
@@ -34,10 +34,10 @@ kubectl -n apps get ingressroute notify
 
 Health endpoints:
 
-- `https://notify.kwe2.org/` (web dashboard UI)
-- `https://notify.kwe2.org/status` (JSON status payload)
-- `https://notify.kwe2.org/readyz` (service readiness)
-- `https://notify.kwe2.org/healthz` (strict health, returns `503` when checks fail)
+- `https://notify.smartmur.ca/` (web dashboard UI)
+- `https://notify.smartmur.ca/status` (JSON status payload)
+- `https://notify.smartmur.ca/readyz` (service readiness)
+- `https://notify.smartmur.ca/healthz` (strict health, returns `503` when checks fail)
 
 `k8s_pods` behavior note:
 
@@ -49,7 +49,7 @@ Health endpoints:
 
 `manifests/apps/homepage/homepage.yml` includes a Notify card in the `Apps` section:
 
-- href: `https://notify.kwe2.org`
+- href: `https://notify.smartmur.ca`
 - monitor: `http://notify:9090/readyz`
 
 ## Secure channel credentials
