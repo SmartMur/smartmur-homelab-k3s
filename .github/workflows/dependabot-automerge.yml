@@ -40,16 +40,18 @@ jobs:
       - name: Approve Dependabot PR
         env:
           GH_TOKEN: ${{ github.token }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
         run: |
-          gh pr review ${{ github.event.pull_request.number }} \
+          gh pr review "$PR_URL" \
             --approve \
             --body "Auto-approved dependency update."
 
       - name: Enable auto-merge
         env:
           GH_TOKEN: ${{ github.token }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
         run: |
-          gh pr merge ${{ github.event.pull_request.number }} \
+          gh pr merge "$PR_URL" \
             --squash \
             --auto \
             --delete-branch
