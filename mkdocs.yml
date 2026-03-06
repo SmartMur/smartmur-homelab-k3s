@@ -1,0 +1,63 @@
+site_name: SmartMur Homelab K3s
+site_url: https://smartmur.github.io/smartmur-homelab-k3s/
+repo_url: https://github.com/SmartMur/smartmur-homelab-k3s
+repo_name: SmartMur/smartmur-homelab-k3s
+
+theme:
+  name: material
+  logo: assets/smartmur-logo.svg
+  favicon: assets/smartmur-logo.svg
+  palette:
+    - scheme: slate
+      primary: deep purple
+      accent: deep purple
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    - scheme: default
+      primary: deep purple
+      accent: deep purple
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Getting Started: getting-started/getting-started.md
+      - Beginner Journey: getting-started/beginner-journey.md
+  - Operations:
+      - Backup & Restore: operations/backup-restore.md
+      - Secret Rotation: operations/secret-rotation.md
+      - Notifications & Monitoring: operations/notify-monitoring.md
+      - Operations Audit: operations/operations-audit.md
+  - Guides:
+      - Dockhand & Headlamp Workflow: guides/dockhand-headlamp-workflow.md
+      - Stack Overview: guides/stack.md
+  - Reference:
+      - Security: reference/security.md
+      - Security Rulebook: reference/security-rulebook.md
+      - Contributing: reference/contributing.md
+      - Support: reference/support.md
+  - Changelog: changelog.md
