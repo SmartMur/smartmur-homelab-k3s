@@ -11,6 +11,8 @@ tags:
 
 # k3s Beginner Journey (From Scratch)
 
+Replace the example addresses, usernames, and email addresses below with values for your own environment.
+
 > Goal: take a brand-new control machine and stand up this full k3s environment end-to-end.
 >
 > Audience: first-time operators.
@@ -290,7 +292,7 @@ Tags: #networking #dns #first-login
 If you do not yet have internal DNS records, map your Traefik LB IP manually in `/etc/hosts`:
 
 ```text
-192.168.100.120 home.lab.local vault.lab.local auth.lab.local n8n.lab.local code.lab.local blog.lab.local obsidian.lab.local forum.lab.local k8s.lab.local
+192.0.2.120 home.lab.local vault.lab.local auth.lab.local n8n.lab.local code.lab.local blog.lab.local obsidian.lab.local forum.lab.local k8s.lab.local
 ```
 
 Then test:

@@ -1,5 +1,7 @@
 # Notify Monitoring on k3s
 
+Replace the example addresses, usernames, and email addresses below with values for your own environment.
+
 This runbook deploys `Notify` into the `apps` namespace and adds it to Homepage.
 
 ## What gets deployed
@@ -70,7 +72,7 @@ kubectl create secret generic notify-channel-secrets -n apps \
   --from-literal=ALERT_SMTP_PORT='587' \
   --from-literal=ALERT_EMAIL_USER='REPLACE_ME' \
   --from-literal=ALERT_EMAIL_PASSWORD='REPLACE_ME' \
-  --from-literal=ALERT_FROM_EMAIL='notify@kwe2.org' \
+  --from-literal=ALERT_FROM_EMAIL='notify@example.org' \
   --from-literal=ALERT_TO_EMAIL_1='you@example.com' \
   --dry-run=client -o yaml | kubectl apply -f -
 ```

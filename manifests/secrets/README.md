@@ -1,5 +1,7 @@
 # Local Secrets Overlay
 
+Replace the example addresses, usernames, and email addresses below with values for your own environment.
+
 Use this directory for local-only secret manifests if you need file-based secret deployment.
 
 - Files in this folder are ignored by `.gitignore`.
@@ -37,7 +39,7 @@ kubectl create secret generic notify-channel-secrets -n apps \
   --from-literal=ALERT_SMTP_PORT='587' \
   --from-literal=ALERT_EMAIL_USER='CHANGE_ME' \
   --from-literal=ALERT_EMAIL_PASSWORD='CHANGE_ME' \
-  --from-literal=ALERT_FROM_EMAIL='notify@kwe2.org' \
+  --from-literal=ALERT_FROM_EMAIL='notify@example.org' \
   --from-literal=ALERT_TO_EMAIL_1='you@example.com' \
   --dry-run=client -o yaml | kubectl apply -f -
 
