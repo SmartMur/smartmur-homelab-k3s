@@ -1,5 +1,7 @@
 # Secret Rotation Schedule
 
+Replace the example addresses, usernames, and email addresses below with values for your own environment.
+
 Last updated: 2026-02-28
 
 Rotation procedures and schedule for all secrets in the k3s cluster.
@@ -155,7 +157,7 @@ kubectl create secret generic notify-channel-secrets -n apps \
   --from-literal=ALERT_SMTP_PORT='587' \
   --from-literal=ALERT_EMAIL_USER='...' \
   --from-literal=ALERT_EMAIL_PASSWORD='...' \
-  --from-literal=ALERT_FROM_EMAIL='notify@kwe2.org' \
+  --from-literal=ALERT_FROM_EMAIL='notify@example.org' \
   --from-literal=ALERT_TO_EMAIL_1='you@example.com' \
   --dry-run=client -o yaml | kubectl apply -f -
 
@@ -198,7 +200,7 @@ for host in K8-Master k3s-worker-01 k3s-worker-02 k3s-worker-03; do
 done
 
 # 3. Also push to Proxmox and TrueNAS
-ssh-copy-id -i ~/.ssh/id_ed25519_new.pub root@192.168.100.100
+ssh-copy-id -i ~/.ssh/id_ed25519_new.pub ops@192.0.2.100
 ssh-copy-id -i ~/.ssh/id_ed25519_new.pub ray@192.168.13.69
 
 # 4. Test new key on all hosts

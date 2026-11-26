@@ -1,5 +1,7 @@
 # Backup & Restore Runbook
 
+Replace the example addresses, usernames, and email addresses below with values for your own environment.
+
 Last updated: 2026-02-28
 
 ---
@@ -35,8 +37,8 @@ Back these up separately -- they are not covered by TrueNAS ZFS snapshots.
 kubectl get pv -o custom-columns='PV:.metadata.name,NODE:.spec.nodeAffinity.required.nodeSelectorTerms[0].matchExpressions[0].values[0],PATH:.spec.hostPath.path'
 
 # Copy data off-node (example for n8n)
-ssh debian@192.168.100.111 "sudo tar czf /tmp/n8n-data.tar.gz -C /var/lib/rancher/k3s/storage/ ."
-scp debian@192.168.100.111:/tmp/n8n-data.tar.gz ./backups/
+ssh debian@192.0.2.111 "sudo tar czf /tmp/n8n-data.tar.gz -C /var/lib/rancher/k3s/storage/ ."
+scp debian@192.0.2.111:/tmp/n8n-data.tar.gz ./backups/
 ```
 
 ---
@@ -101,7 +103,7 @@ k3s uses embedded etcd on the master node. Snapshots capture all cluster state (
 ### Save a snapshot
 
 ```bash
-ssh debian@192.168.100.110
+ssh debian@192.0.2.110
 
 # On-demand snapshot
 sudo k3s etcd-snapshot save --name manual-backup
@@ -112,19 +114,19 @@ sudo k3s etcd-snapshot save --name manual-backup
 ### List snapshots
 
 ```bash
-ssh debian@192.168.100.110 "sudo k3s etcd-snapshot list"
+ssh debian@192.0.2.110 "sudo k3s etcd-snapshot list"
 ```
 
 ### Copy snapshots off-node
 
 ```bash
-scp debian@192.168.100.110:/var/lib/rancher/k3s/server/db/snapshots/manual-backup* ./backups/
+scp debian@192.0.2.110:/var/lib/rancher/k3s/server/db/snapshots/manual-backup* ./backups/
 ```
 
 ### Restore from snapshot
 
 ```bash
-ssh debian@192.168.100.110
+ssh debian@192.0.2.110
 
 # Stop k3s
 sudo systemctl stop k3s
@@ -141,7 +143,7 @@ sudo systemctl start k3s
 k3s saves etcd snapshots every 12 hours by default, retaining 5. Verify:
 
 ```bash
-ssh debian@192.168.100.110 "sudo k3s etcd-snapshot list"
+ssh debian@192.0.2.110 "sudo k3s etcd-snapshot list"
 ```
 
 ---
@@ -223,7 +225,7 @@ kubectl create secret generic notify-channel-secrets -n apps \
   --from-literal=ALERT_SMTP_PORT='587' \
   --from-literal=ALERT_EMAIL_USER='CHANGE_ME' \
   --from-literal=ALERT_EMAIL_PASSWORD='CHANGE_ME' \
-  --from-literal=ALERT_FROM_EMAIL='notify@kwe2.org' \
+  --from-literal=ALERT_FROM_EMAIL='notify@example.org' \
   --from-literal=ALERT_TO_EMAIL_1='you@example.com' \
   --dry-run=client -o yaml | kubectl apply -f -
 
@@ -265,7 +267,7 @@ This rebuilds the entire cluster from scratch using the repo's bootstrap scripts
 
 ### Prerequisites
 
-- Proxmox hosts online (PVE1 at 192.168.100.100)
+- Proxmox hosts online (PVE1 at 192.0.2.100)
 - TrueNAS online with NFS exports intact at 192.168.13.69
 - Control node has: `bash`, `git`, `terraform`, `ansible`, `kubectl`, `helm`
 - Repo cloned: `git clone <repo-url> && cd k3s-cluster`
@@ -322,7 +324,7 @@ bash scripts/05-sync-dockhand-contexts.sh
 After step 5, `02-cluster-setup.sh` generates a new kubeconfig. If you need it manually:
 
 ```bash
-scp debian@192.168.100.110:~/.kube/config ./kubeconfig-raw.yml
+scp debian@192.0.2.110:~/.kube/config ./kubeconfig-raw.yml
 # Update server address if using SSH tunnel
 sed -i '' 's|https://127.0.0.1:6443|https://127.0.0.1:7443|' ./kubeconfig-raw.yml
 export KUBECONFIG=$(pwd)/kubeconfig-raw.yml
@@ -397,7 +399,7 @@ kubectl get pvc -A | grep -v Bound
 # (should return nothing)
 
 # TrueNAS NFS accessible from nodes
-ssh debian@192.168.100.111 "showmount -e 192.168.13.69"
+ssh debian@192.0.2.111 "showmount -e 203.0.113.69"
 ```
 
 ### Networking
@@ -405,7 +407,7 @@ ssh debian@192.168.100.111 "showmount -e 192.168.13.69"
 ```bash
 # MetalLB and Traefik
 kubectl get svc traefik -n traefik
-# Should show EXTERNAL-IP 192.168.100.120
+# Should show EXTERNAL-IP 192.0.2.120
 
 # IngressRoutes
 kubectl get ingressroute -A
@@ -435,5 +437,5 @@ kubectl get secret notify-channel-secrets -n apps
 ### etcd health
 
 ```bash
-ssh debian@192.168.100.110 "sudo k3s etcd-snapshot list"
+ssh debian@192.0.2.110 "sudo k3s etcd-snapshot list"
 ```

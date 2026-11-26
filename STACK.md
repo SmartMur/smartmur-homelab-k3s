@@ -1,5 +1,7 @@
 # LABing — Full Stack Documentation
 
+Replace the example addresses, usernames, and email addresses below with values for your own environment.
+
 > Generated: 2026-02-22 | Cluster: k3s v1.31.4
 > Latest operations audit: `docs/OPERATIONS_AUDIT_2026-02-22.md`
 
@@ -20,10 +22,10 @@ NPM — Nginx Proxy Manager (192.168.30.117:443)
     │
     ▼
 TrueNAS Relay — nginx on 192.168.13.69:19200
-  └── Forwards HTTPS → Traefik (192.168.100.120:443)
+  └── Forwards HTTPS → Traefik (192.0.2.120:443)
     │
     ▼
-Traefik v2 (MetalLB VIP: 192.168.100.120)
+Traefik v2 (MetalLB VIP: 192.0.2.120)
   └── Routes by Host header to k3s pods
     │
     ├── Apps namespace (apps)
@@ -37,8 +39,8 @@ Traefik v2 (MetalLB VIP: 192.168.100.120)
 
 | Host | IP | Role |
 |---|---|---|
-| Proxmox PVE1 | 192.168.100.100 | Hypervisor — hosts master + workers |
-| Proxmox PVE2 | 192.168.100.200 | Hypervisor (expansion) |
+| Proxmox PVE1 | 192.0.2.100 | Hypervisor — hosts master + workers |
+| Proxmox PVE2 | 192.0.2.200 | Hypervisor (expansion) |
 | TrueNAS | 192.168.13.69 | NFS storage + nginx relay |
 | Docker Server | 192.168.30.117 | NPM, Dockhand, misc Docker services |
 | Mac (control) | via Tailscale | kubectl + SSH management |
@@ -47,10 +49,10 @@ Traefik v2 (MetalLB VIP: 192.168.100.120)
 
 | Node | IP | Role | Proxmox VM |
 |---|---|---|---|
-| k3s-master-01 | 192.168.100.110 | control-plane | PVE1 |
-| k3s-worker-01 | 192.168.100.111 | worker | PVE1 |
-| k3s-worker-02 | 192.168.100.112 | worker | PVE1 |
-| k3s-worker-03 | 192.168.100.113 | worker | PVE1 |
+| k3s-master-01 | 192.0.2.110 | control-plane | PVE1 |
+| k3s-worker-01 | 192.0.2.111 | worker | PVE1 |
+| k3s-worker-02 | 192.0.2.112 | worker | PVE1 |
+| k3s-worker-03 | 192.0.2.113 | worker | PVE1 |
 
 ---
 
@@ -63,7 +65,7 @@ Traefik v2 (MetalLB VIP: 192.168.100.120)
 cat ~/Library/LaunchAgents/k3s-kubectl-tunnel.plist
 
 # Manual tunnel if needed
-ssh -N -L 7443:192.168.100.110:6443 root@192.168.100.100
+ssh -N -L 7443:192.0.2.110:6443 ops@192.0.2.100
 
 # kubectl is pre-configured
 kubectl get nodes
@@ -76,10 +78,10 @@ All nodes configured with Mac's ed25519 SSH key.
 
 ```bash
 # ~/.ssh/config already has these entries
-ssh K8-Master       # debian@192.168.100.110 (control plane)
-ssh k3s-worker-01   # debian@192.168.100.111
-ssh k3s-worker-02   # debian@192.168.100.112
-ssh k3s-worker-03   # debian@192.168.100.113
+ssh K8-Master       # debian@192.0.2.110 (control plane)
+ssh k3s-worker-01   # debian@192.0.2.111
+ssh k3s-worker-02   # debian@192.0.2.112
+ssh k3s-worker-03   # debian@192.0.2.113
 
 # User: debian  |  Auth: SSH key (no password)
 ```
@@ -129,7 +131,7 @@ All `*.smartmur.ca` subdomains must exist in BOTH:
 
 ### TrueNAS Relay
 
-Bridges Docker server subnet (192.168.30.x) to k3s subnet (192.168.100.x).
+Bridges Docker server subnet (198.51.100.x) to k3s subnet (192.0.2.x).
 
 ```
 Config: /mnt/strange/ray/k3s-relay/nginx.conf (on TrueNAS)
@@ -145,8 +147,8 @@ ssh ray@192.168.13.69 "nginx -c /mnt/strange/ray/k3s-relay/nginx.conf -s reload"
 
 ### MetalLB
 
-- Pool: `192.168.100.120–192.168.100.130`
-- Traefik VIP: `192.168.100.120` (LoadBalancer service)
+- Pool: `192.0.2.120–192.0.2.130`
+- Traefik VIP: `192.0.2.120` (LoadBalancer service)
 - Config: IPAddressPool created inline by Ansible in `ansible/playbook-nfs.yml`
 
 ---
@@ -472,13 +474,13 @@ kubectl get secret <name> -n <namespace> -o jsonpath='{.data}' | \
 
 | Resource | IP | Notes |
 |---|---|---|
-| Traefik VIP | 192.168.100.120 | MetalLB LoadBalancer |
-| k3s Master | 192.168.100.110 | API server, etcd |
-| k3s Worker 01 | 192.168.100.111 | |
-| k3s Worker 02 | 192.168.100.112 | |
-| k3s Worker 03 | 192.168.100.113 | |
-| Proxmox PVE1 | 192.168.100.100 | Main hypervisor |
-| Proxmox PVE2 | 192.168.100.200 | Secondary hypervisor |
+| Traefik VIP | 192.0.2.120 | MetalLB LoadBalancer |
+| k3s Master | 192.0.2.110 | API server, etcd |
+| k3s Worker 01 | 192.0.2.111 | |
+| k3s Worker 02 | 192.0.2.112 | |
+| k3s Worker 03 | 192.0.2.113 | |
+| Proxmox PVE1 | 192.0.2.100 | Main hypervisor |
+| Proxmox PVE2 | 192.0.2.200 | Secondary hypervisor |
 | TrueNAS | 192.168.13.69 | Storage + relay |
 | Docker Server | 192.168.30.117 | NPM + Docker |
 | Unifi (DNS/FW) | 192.168.13.13 | Internal DNS authority |
